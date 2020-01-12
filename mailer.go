@@ -29,6 +29,7 @@ import (
 type Mailer struct {
 	Send         func(*mail.Message) error
 	ConfigGetter func(string) *FormCfg
+	Headers      map[string]string
 }
 
 type FormCfg struct {
@@ -68,6 +69,9 @@ func eval(tmpl string, data interface{}) string {
 
 // ServeHTTP processes POST requests
 func (m Mailer) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
+	for k, v := range m.Headers {
+		writer.Header().Add(k, v)
+	}
 	fail := func(statusCode int, msg string, args ...interface{}) {
 		log.Errorf(msg, args...)
 		writer.WriteHeader(statusCode)

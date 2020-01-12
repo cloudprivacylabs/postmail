@@ -44,6 +44,7 @@ func main() {
 	flag.String("http-cert", "", "Certificate for HTTP TLS configuration")
 	flag.String("http-key", "", "Certificate key for HTTP TLS configuration")
 	flag.String("http-ca", "", "CA cert for HTTP TLS configuration")
+	flag.StringToString("http-header", map[string]string{}, "HTTP headers")
 
 	flag.Parse()
 	viper.BindPFlags(flag.CommandLine)
@@ -123,7 +124,8 @@ func main() {
 	server := http.Server{Addr: fmt.Sprintf(":%d", viper.GetInt("http-port")),
 		Handler: Mailer{Send: func(m *mail.Message) error {
 			return smtpDialer.DialAndSend(m)
-		}, ConfigGetter: configGetter},
+		}, ConfigGetter: configGetter,
+			Headers: viper.GetStringMapString("http-header")},
 		TLSConfig:    httpTLS,
 		TLSNextProto: make(map[string]func(*http.Server, *tls.Conn, http.Handler), 0)}
 
